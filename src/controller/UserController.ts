@@ -30,68 +30,73 @@ export default class UserController {
             case 'GET':
                 break;
             case 'DELETE':
-                if (!params.id) { return res.status(400).send({ message: 'Id is required'}); }
+                if (!params.id) {
+                    return res.status(400).send({message: 'Id is required'});
+                }
                 break;
             case 'POST':
-                if (Object.keys(req.body).length === 0) { return res.status(400).send({ message: "Request body can't be empty"}); }
+                if (Object.keys(req.body).length === 0) {
+                    return res.status(400).send({message: "Request body can't be empty"});
+                }
                 break;
             case 'PUT':
-                if (!params.id) { return res.status(400).send({ message: 'Id is required'}); }
-                if (Object.keys(req.body).length === 0) { return res.status(400).send({ message: "Request body can't be empty"}); }
+                if (!params.id) {
+                    return res.status(400).send({message: 'Id is required'});
+                }
+                if (Object.keys(req.body).length === 0) {
+                    return res.status(400).send({message: "Request body can't be empty"});
+                }
                 break;
         }
         next();
     }
-    public async login (req: express.Request, res: express.Response)
-    {
+
+    public async login(req: express.Request, res: express.Response) {
         const loginData = req.body;
         const user = await User.findOne(
             {
-                NAME: loginData.name,
-                EMAIL: loginData.email,
+                username: loginData.name
             });
-        if (user && user.PASSWORD == loginData.password) {
+        if (user && user.password == loginData.password) {
             return res.send('login');
         } else {
             return res.send('wrong credentials');
         }
     }
 
-    public async createUser (req: express.Request, res: express.Response) {
+    public async createUser(req: express.Request, res: express.Response) {
         const userData = req.body;
         const user = new User();
-        user.EMAIL = userData.email;
-        user.NAME = userData.name;
-        user.PASSWORD = userData.password; // This should be encrypted!
-        user.save();
+        user.username = userData.username;
+        user.password = userData.password; // This should be encrypted!
+        user.role = userData.role;
+        await user.save();
 
         return res.send(user);
     }
 
-    public async getAllUsers (req: express.Request, res: express.Response) {
-        const clients = await User.find();
+    public async getAllUsers(req: express.Request, res: express.Response) {
+        const clients = await User.find({relations:["role"]});
         return res.send(clients);
     }
 
-    public async getUser (req: express.Request, res: express.Response) {
-        const client =  await User.findOne(req.params.id);
+    public async getUser(req: express.Request, res: express.Response) {
+        const client = await User.findOne(req.params.id, {relations:["role"]});
         return res.send(client);
     }
-
-
 
     public async updateUser(req: express.Request, res: express.Response) {
         const user = await User.findOne(req.params.id);
         if (user !== undefined) {
             await User.update(req.params.id, req.body);
-            return res.status(200).send({ message: 'User updated correctly'});
+            return res.status(200).send({message: 'User updated correctly'});
         }
 
-        return res.status(404).send({ message: 'User not found'});
+        return res.status(404).send({message: 'User not found'});
     }
 
     public async deleteUser(req: express.Request, res: express.Response) {
-        User.delete(req.params.id);
-        return res.status(200).send({ message: 'User deleted successfully'});
+        await User.delete(req.params.id);
+        return res.status(200).send({message: 'User deleted successfully'});
     }
 }

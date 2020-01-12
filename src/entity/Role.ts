@@ -1,11 +1,14 @@
-import {BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity()
 export class Role extends BaseEntity {
 
     @PrimaryGeneratedColumn('increment')
-    ID: number | undefined;
+    id: number | undefined;
 
     @Column({type: 'varchar', length: 25})
-    NAME: string | undefined;
+    name: string | undefined;
+
+    // @OneToOne(type => User, user => user.role)
+    // user: User | undefined;
 }
